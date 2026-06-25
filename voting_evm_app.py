@@ -378,7 +378,7 @@ class Web3TerminalServer(BaseHTTPRequestHandler):
 </html>"""
         self._write_html(html)
 
-if __name__ == '__main__':
+ if __name__ == '__main__':
     httpd = HTTPServer(('', 8080), Web3TerminalServer)
     print("\n" + "="*50)
     print("[OBSIDIAN LIQUID DEMOCRACY NODE ACTIVE]")
