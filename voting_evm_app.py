@@ -378,14 +378,16 @@ class Web3TerminalServer(BaseHTTPRequestHandler):
 </html>"""
         self._write_html(html)
 
- if __name__ == '__main__':
-    httpd = HTTPServer(('', 8080), Web3TerminalServer)
+if __name__ == '__main__':
+    import os
+    port = int(os.environ.get("PORT", 8080))
+    httpd = HTTPServer(('', port), Web3TerminalServer)
     print("\n" + "="*50)
-    print("[OBSIDIAN LIQUID DEMOCRACY NODE ACTIVE]")
+    print(f"[OBSIDIAN LIQUID DEMOCRACY NODE ACTIVE ON PORT {port}]")
     print("="*50)
     print(f"[ROOT] {EVM_STATE.chairperson}")
     print("="*50)
-    print(">> ACCESS TERMINAL: http://localhost:8080/")
+    print(f">> ACCESS TERMINAL: http://localhost:{port}/ (or via Render URL)")
     print(">> Press Ctrl+C to terminate connection.")
     try: httpd.serve_forever()
     except KeyboardInterrupt: httpd.server_close()
