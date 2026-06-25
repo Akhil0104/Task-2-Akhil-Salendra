@@ -2,6 +2,7 @@ import hashlib
 import time
 import json
 import re
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse, quote
 
@@ -237,9 +238,9 @@ class Web3TerminalServer(BaseHTTPRequestHandler):
             <div>
                 <label class="block text-xs text-zinc-500 mb-2 uppercase tracking-widest">Inject Hex Identity</label>
                 <input type="text" name="wallet_address" required placeholder="0x..." maxlength="42" 
-                    class="w-full bg-zinc-900 border border-zinc-700 p-3 text-sm text-zinc-300 rounded focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    class="w-full bg-zinc-900 border border-zinc-700 p-3 text-sm text-zinc-300 rounded focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-300">
             </div>
-            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white p-3 text-sm font-bold uppercase tracking-widest rounded transition-colors">
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white p-3 text-sm font-bold uppercase tracking-widest rounded transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_0_15px_rgba(79,70,229,0.5)]">
                 Initialize Session
             </button>
         </form>
@@ -261,37 +262,37 @@ class Web3TerminalServer(BaseHTTPRequestHandler):
         alert_html = f"<div class='p-3 mb-6 rounded border text-xs font-mono flex justify-between {'border-red-500/50 text-red-400 bg-red-950/20' if alert_type=='error' else 'border-emerald-500/50 text-emerald-400 bg-emerald-950/20'}'><span>[SYS] {alert_msg}</span><a href='/dashboard?user={active_user}' class='text-zinc-500 hover:text-white'>[X]</a></div>" if alert_msg else ""
 
         admin_panel = f"""
-        <div class="border border-indigo-500/30 bg-indigo-950/10 p-5 rounded-lg mb-6">
+        <div class="border border-indigo-500/30 bg-indigo-950/10 p-5 rounded-lg mb-6 transition-all duration-300 hover:border-indigo-500/50 hover:shadow-[0_0_20px_rgba(79,70,229,0.15)]">
             <h2 class="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-4">// Root Access: Mint Voting Weight</h2>
             <form action="/authorize?user={active_user}" method="POST" class="flex gap-2">
-                <input type="text" name="voter_address" placeholder="Target 0x..." class="flex-1 bg-zinc-900 border border-zinc-700 p-2 text-xs text-zinc-300 rounded focus:outline-none focus:border-indigo-500">
-                <input type="number" name="token_weight" value="1" min="1" class="w-20 bg-zinc-900 border border-zinc-700 p-2 text-xs text-zinc-300 rounded focus:outline-none focus:border-indigo-500">
-                <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-bold rounded">EXECUTE</button>
+                <input type="text" name="voter_address" placeholder="Target 0x..." class="flex-1 bg-zinc-900 border border-zinc-700 p-2 text-xs text-zinc-300 rounded focus:outline-none focus:border-indigo-500 transition-colors">
+                <input type="number" name="token_weight" value="1" min="1" class="w-20 bg-zinc-900 border border-zinc-700 p-2 text-xs text-zinc-300 rounded focus:outline-none focus:border-indigo-500 transition-colors">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-bold rounded transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_15px_rgba(79,70,229,0.5)]">EXECUTE</button>
             </form>
         </div>""" if is_admin else ""
 
         user_panel = f"""
         <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="border border-zinc-800 bg-zinc-900/50 p-5 rounded-lg">
+            <div class="border border-zinc-800 bg-zinc-900/50 p-5 rounded-lg transition-all duration-300 hover:border-emerald-500/30">
                 <h2 class="text-zinc-400 text-[10px] font-bold uppercase tracking-widest mb-4">Direct Execution (CEI)</h2>
                 <form action="/vote?user={active_user}" method="POST" class="space-y-3">
-                    <select name="proposal_id" class="w-full bg-zinc-900 border border-zinc-700 p-2 text-xs text-zinc-300 rounded focus:outline-none focus:border-emerald-500">
+                    <select name="proposal_id" class="w-full bg-zinc-900 border border-zinc-700 p-2 text-xs text-zinc-300 rounded focus:outline-none focus:border-emerald-500 transition-colors">
                         {"".join(f'<option value="{p["id"]}">[{p["id"]}] {p["display_name"]}</option>' for p in EVM_STATE.proposals)}
                     </select>
-                    <button type="submit" class="w-full bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/50 py-2 text-xs font-bold rounded">COMMIT VOTE</button>
+                    <button type="submit" class="w-full bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 border border-emerald-500/50 py-2 text-xs font-bold rounded transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]">COMMIT VOTE</button>
                 </form>
             </div>
-            <div class="border border-zinc-800 bg-zinc-900/50 p-5 rounded-lg">
+            <div class="border border-zinc-800 bg-zinc-900/50 p-5 rounded-lg transition-all duration-300 hover:border-amber-500/30">
                 <h2 class="text-zinc-400 text-[10px] font-bold uppercase tracking-widest mb-4">Liquid Delegation (Proxy)</h2>
                 <form action="/delegate?user={active_user}" method="POST" class="space-y-3">
-                    <input type="text" name="proxy_address" placeholder="Proxy 0x..." class="w-full bg-zinc-900 border border-zinc-700 p-2 text-xs text-zinc-300 rounded focus:outline-none focus:border-amber-500">
-                    <button type="submit" class="w-full bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 border border-amber-500/50 py-2 text-xs font-bold rounded">DELEGATE POWER</button>
+                    <input type="text" name="proxy_address" placeholder="Proxy 0x..." class="w-full bg-zinc-900 border border-zinc-700 p-2 text-xs text-zinc-300 rounded focus:outline-none focus:border-amber-500 transition-colors">
+                    <button type="submit" class="w-full bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 border border-amber-500/50 py-2 text-xs font-bold rounded transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_0_15px_rgba(245,158,11,0.3)]">DELEGATE POWER</button>
                 </form>
             </div>
         </div>"""
 
         props = "".join([f"""
-        <div class="border border-zinc-800 bg-zinc-900/50 p-4 rounded flex justify-between items-center">
+        <div class="border border-zinc-800 bg-zinc-900/50 p-4 rounded flex justify-between items-center transition-all duration-300 hover:border-emerald-500/50 hover:bg-zinc-800/50 transform hover:-translate-y-0.5">
             <div>
                 <div class="text-[10px] text-zinc-500">{p['bytes32_name']}</div>
                 <div class="text-sm font-bold text-zinc-200 mt-1">{p['display_name']}</div>
@@ -303,7 +304,7 @@ class Web3TerminalServer(BaseHTTPRequestHandler):
         </div>""" for p in EVM_STATE.proposals])
 
         ledger = "".join([f"""
-        <div class="border-l-2 border-zinc-700 pl-3 mb-4">
+        <div class="border-l-2 border-zinc-700 pl-3 mb-4 transition-all duration-300 hover:border-indigo-500 hover:bg-zinc-800/30 rounded-r py-1">
             <div class="flex justify-between items-end mb-1">
                 <span class="text-xs font-bold text-zinc-300">{tx['action']}</span>
                 <span class="text-[9px] text-zinc-500">BLK: {tx['block_height']}</span>
@@ -313,7 +314,6 @@ class Web3TerminalServer(BaseHTTPRequestHandler):
         </div>""" for tx in reversed(EVM_STATE.transaction_ledger)])
 
         gas_val = 21000 + (len(EVM_STATE.proposals) * 21000)
-        gas_pct = (gas_val / 300000) * 100
 
         html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -325,37 +325,62 @@ class Web3TerminalServer(BaseHTTPRequestHandler):
         body {{ background-color: #09090b; color: #e4e4e7; font-family: 'JetBrains Mono', monospace; }}
         ::-webkit-scrollbar {{ width: 4px; }}
         ::-webkit-scrollbar-thumb {{ background: #27272a; }}
+        
+        /* 🎨 CUSTOM ANIMATIONS */
+        @keyframes fadeInUp {{
+            0% {{ opacity: 0; transform: translateY(20px); }}
+            100% {{ opacity: 1; transform: translateY(0); }}
+        }}
+        .animate-fade-in {{ animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }}
+        .delay-100 {{ animation-delay: 0.1s; }}
+        .delay-200 {{ animation-delay: 0.2s; }}
+        .delay-300 {{ animation-delay: 0.3s; }}
+        
+        /* Smooth glowing borders on hover */
+        .glass-panel {{ transition: all 0.3s ease; }}
+        .glass-panel:hover {{ border-color: #4f46e5; box-shadow: 0 0 20px -5px rgba(79, 70, 229, 0.3); transform: translateY(-2px); }}
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4 md:p-8 overflow-x-hidden">
 <div class="max-w-6xl mx-auto">
     
-    {alert_html}
+    <div class="animate-fade-in">
+        {alert_html}
+    </div>
 
-    <header class="border border-zinc-800 bg-zinc-900 p-6 rounded-xl mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <header class="animate-fade-in border border-zinc-800 bg-zinc-900 p-6 rounded-xl mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <div class="flex items-center gap-3 mb-2">
-                <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest {'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' if is_admin else 'bg-zinc-800 text-zinc-400'}">{'ROOT/DEPLOYER' if is_admin else 'STANDARD/USER'}</span>
-                <span class="text-[10px] text-emerald-500/80">{'● ONLINE' if not has_voted else '○ LOCKED'}</span>
+                <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest {'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' if is_admin else 'bg-zinc-800 text-zinc-400'} transition-all duration-300 hover:bg-indigo-500/40">{'ROOT/DEPLOYER' if is_admin else 'STANDARD/USER'}</span>
+                <span class="text-[10px] text-emerald-500/80 flex items-center gap-2">
+                    <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>
+                    {'ONLINE' if not has_voted else 'LOCKED'}
+                </span>
             </div>
             <h1 class="text-xl font-bold tracking-widest text-zinc-100 uppercase">Liquid Democracy Protocol</h1>
             <p class="text-[10px] text-zinc-500 mt-1">ID: {active_user} | PWR: {my_weight}</p>
         </div>
         <div class="flex gap-4">
-            <div class="border border-zinc-800 bg-black/50 p-3 rounded text-center">
+            <div class="border border-zinc-800 bg-black/50 p-3 rounded text-center transition-all duration-300 hover:border-amber-500/50">
                 <div class="text-[9px] text-zinc-500 uppercase tracking-widest">Network Gas Burn</div>
                 <div class="text-sm font-bold text-amber-500">{gas_val:,} WEI</div>
             </div>
-            <a href="/" class="border border-red-500/20 text-red-400 bg-red-950/10 hover:bg-red-900/30 p-3 rounded text-xs font-bold flex items-center transition">DISCONNECT</a>
+            <a href="/" class="border border-red-500/20 text-red-400 bg-red-950/10 hover:bg-red-900/40 hover:text-red-300 p-3 rounded text-xs font-bold flex items-center transition-all duration-300 transform hover:scale-105">DISCONNECT</a>
         </div>
     </header>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2">
-            {admin_panel}
-            {user_panel}
             
-            <div class="border border-zinc-800 bg-zinc-900 p-5 rounded-xl">
+            <div class="animate-fade-in delay-100">
+                {admin_panel}
+            </div>
+            
+            <div class="animate-fade-in delay-200">
+                {user_panel}
+            </div>
+            
+            <div class="animate-fade-in delay-300 border border-zinc-800 bg-zinc-900 p-5 rounded-xl glass-panel">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-zinc-100 text-xs font-bold uppercase tracking-widest">State: Proposals Matrix</h2>
                     <span class="text-[10px] text-emerald-400">{EVM_STATE.winningProposal()['display_name'] if EVM_STATE.winningProposal() and EVM_STATE.winningProposal()['voteCount'] > 0 else 'AWAITING VOTES'}</span>
@@ -364,9 +389,12 @@ class Web3TerminalServer(BaseHTTPRequestHandler):
             </div>
         </div>
         
-        <div>
-            <div class="border border-zinc-800 bg-zinc-900 p-5 rounded-xl h-full">
-                <h2 class="text-zinc-100 text-xs font-bold uppercase tracking-widest mb-4">Immutable Ledger</h2>
+        <div class="animate-fade-in delay-300">
+            <div class="border border-zinc-800 bg-zinc-900 p-5 rounded-xl h-full glass-panel">
+                <h2 class="text-zinc-100 text-xs font-bold uppercase tracking-widest mb-4 flex items-center justify-between">
+                    Immutable Ledger
+                    <div class="h-1 w-1 bg-emerald-500 rounded-full animate-ping"></div>
+                </h2>
                 <div class="h-[500px] overflow-y-auto pr-2">
                     {ledger if ledger else '<div class="text-zinc-600 text-[10px] text-center mt-10">NO BLOCKS MINED</div>'}
                 </div>
@@ -379,7 +407,6 @@ class Web3TerminalServer(BaseHTTPRequestHandler):
         self._write_html(html)
 
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get("PORT", 8080))
     httpd = HTTPServer(('', port), Web3TerminalServer)
     print("\n" + "="*50)
